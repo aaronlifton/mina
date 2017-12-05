@@ -2,6 +2,7 @@ module Mina
   module Helpers
     module Internal
       include Helpers::Output
+      include Helpers::Format
 
       def deploy_script
         yield
@@ -12,26 +13,6 @@ module Mina
         require 'erb'
         erb = ERB.new(File.read(file))
         erb.result b
-      end
-
-      def echo_cmd(code, ignore_verbose = false)
-        if fetch(:verbose) && !ignore_verbose
-          "echo #{Shellwords.escape('$ ' + code)} &&\n#{code}"
-        else
-          code
-        end
-      end
-
-      def indent(count, str)
-        str.gsub(/^/, ' ' * count)
-      end
-
-      def unindent(code)
-        if code =~ /^\n([ \t]+)/
-          code = code.gsub(/^#{$1}/, '')
-        end
-
-        code.strip
       end
 
       def report_time

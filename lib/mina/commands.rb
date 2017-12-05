@@ -2,7 +2,6 @@ module Mina
   class Commands
     extend Forwardable
     include Helpers::Internal
-    include Helpers::Bash
     include Configuration::DSL
 
     attr_reader :queue
@@ -13,16 +12,8 @@ module Mina
       @queue = Hash.new { |hash, key| hash[key] = [] }
     end
 
-    def command(code, strip: true, quiet: false, indent: nil)
-      if strip
-        code = unindent(code)
-        code = format_command(code)
-      end
-      if indent
-        code = format_command(code)
-        code = indent(indent, code)
-      end
-      queue[stage] << (quiet ? code : echo_cmd(code))
+    def command(code, **options)
+      queue[stage] << format_code(code, options)
     end
 
     def comment(code, indent: nil)
