@@ -2,6 +2,7 @@ module Mina
   class Commands
     extend Forwardable
     include Helpers::Internal
+    include Helpers::Bash
     include Configuration::DSL
 
     attr_reader :queue
@@ -37,7 +38,8 @@ module Mina
     def process(path = nil)
       if path && !queue[stage].empty?
         queue[stage].unshift(%{echo "$ cd #{path}"}) if fetch(:verbose)
-        %{(cd #{path} && #{queue[stage].join(' && ')} && cd -)}
+        commands = format_commands(queue[stage])
+        %{(cd #{path} && #{commands} && cd -)}
       else
         queue[stage].join("\n")
       end
