@@ -71,6 +71,17 @@ describe Mina::Commands do
       expect(commands.process('some/path')).to eq('(cd some/path && ls -al && pwd && cd -)')
     end
 
+    context 'with background command' do
+      before do
+        commands.command("nohup echo '' > /dev/null 2>&1 &")
+        commands.command("echo '' &", indent: 4)
+      end
+
+      it 'properly formats background commands' do
+        expect(commands.process).to eq("ls -al\npwd\n(nohup echo '' > /dev/null 2>&1 &)\n    (echo '' &)")
+      end
+    end
+
     context 'when verbose' do
       before { Mina::Configuration.instance.set(:verbose, true) }
       after { Mina::Configuration.instance.remove(:verbose) }

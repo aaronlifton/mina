@@ -14,8 +14,14 @@ module Mina
     end
 
     def command(code, strip: true, quiet: false, indent: nil)
-      code = unindent(code) if strip
-      code = indent(indent, code) if indent
+      if strip
+        code = unindent(code)
+        code = format_command(code)
+      end
+      if indent
+        code = format_command(code)
+        code = indent(indent, code)
+      end
       queue[stage] << (quiet ? code : echo_cmd(code))
     end
 
@@ -38,8 +44,7 @@ module Mina
     def process(path = nil)
       if path && !queue[stage].empty?
         queue[stage].unshift(%{echo "$ cd #{path}"}) if fetch(:verbose)
-        commands = format_commands(queue[stage])
-        %{(cd #{path} && #{commands} && cd -)}
+        %{(cd #{path} && #{queue[stage].join(' && ')} && cd -)}
       else
         queue[stage].join("\n")
       end
